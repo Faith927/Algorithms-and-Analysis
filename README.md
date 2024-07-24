@@ -52,6 +52,8 @@ the 1st row.
 
 As an example, consider we have the following spreadsheet:
 
+![image](https://github.com/user-attachments/assets/701a4607-825a-4104-b74e-cc96cf5c4879)
+
 Then we would have the following arrays:
 
 • ColA = [2, 1, 0, 2], as in row 0, column 2 has a value, for row 1, column 1, and for row 2, columns
