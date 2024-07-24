@@ -1,6 +1,7 @@
 from spreadsheet.baseSpreadsheet import BaseSpreadsheet
 from spreadsheet.cell import Cell
 
+
 # ------------------------------------------------------------------------
 # This class is required TO BE IMPLEMENTED
 # Trie-based dictionary implementation.
@@ -10,102 +11,84 @@ from spreadsheet.cell import Cell
 # ------------------------------------------------------------------------
 
 
-
-
 class CSRSpreadsheet(BaseSpreadsheet):
 
     def __init__(self):
+        # initializing class
         self.colA = []
         self.valA = []
         self.sumA = []
         self.cols = []
-        self.row = []
-        self.num = []
-        self.rows = []
 
     def buildSpreadsheet(self, lCells: [Cell]):
         """
         Construct the data structure to store nodes.
         @param lCells: list of cells to be stored
         """
-
-        # TO BE IMPLEMENTED
+        # empty lists to store rows, columns, and values
         rows = []
         cols = []
         value = []
+        # appending row, column, and values to their respective lists
         for item in lCells:
             rows.append(item.row)
             cols.append(item.col)
             value.append(item.val)
-        # finding the number of columns in the spreadsheet
-        columns = max(cols) + 1  # adding one for 0
+        # Finding number of columns:
+        columns = max(cols)
 
-        # finding number of rows
-        columns_rows = len(rows)/columns
-        # print(columns_rows)
-        num_row = max(rows) + 1 # adding one for 0
-        # ColA
-        zipped_rc = zip(rows, cols)  # zipping the rows and cols lists together
-        zipped = list(zipped_rc)
-        res = sorted(zipped, key=lambda x: x[0])
-        # printing result
-        # print("final list - ", res)
-        colA = []
-        for element in res:
-            colA.append(element[1])
-        # print("length", len(colA))
-        # print(colA)
-        # colA = [x for _, x in sorted(zipped_rc)]  # sorting columns according to row placement
-        # ValA
-        zipped_rv = zip(rows, value)  # zipping rows and values together
-        # Converting to list
-        zipped = list(zipped_rv)
-        res = sorted(zipped, key=lambda x: x[0])
-        # printing result
-        # print("final list - ", res)
-        valA = []
-        for element in res:
-            valA.append(element[1])
-        # print(valA)
-        # for x in zipped_rv:
-        #     print(x)
-        # # valA = [x for _, x in sorted(zipped_rv)]  # sorting the values according to the row placement
-        # print(valA)
-        # SumA
-        myList = []  # creating a list to store the tuples of row and values
-        zipped_pairs = zip(rows, value)  # zipping rows and values together
-        for num in sorted(zipped_pairs):  # appending the sorted tuples to myList
+        # sorting columns according to row placement for ColA
+        zipped_rc = zip(rows, cols)
+        colA = [x for _, x in sorted(zipped_rc)]
+
+        # sorting values according to row placement for ValA
+        zipped_rv = zip(rows, value)
+        valA = [x for _, x in sorted(zipped_rv)]
+
+        # creating a list which stores sorted rows and values
+        myList = []
+        zipped_pairs = zip(rows, value)
+        for num in sorted(zipped_pairs):
             myList.append(num)
-        sum_dict = {}  # creating a dict to store the sum of each column by value
+
+        # creating a dict to store the sum of each column by value
+        sum_dict = {}
         [sum_dict.__setitem__(first, sum_dict.get(first, 0) + second) for first, second in myList]
-        rv_list = list(sum_dict.items())  # creating a list from the dictionary
-        m_list = [z[1] for z in rv_list]  # taking only the second values from the list
-        sumVal = [sum(m_list[:i + 1]) for i in range(len(m_list))]  # finding the sum for each value
-        sumVal.insert(0, 0)
-        rows.sort()  # sorting rows
-        rows.insert(0, 0)  # appending 0 to the start of the list
-        diff = [rows[i + 1] - rows[i] for i in range(len(rows) - 1)]  # finding the difference of each value in list
-        diff.insert(len(diff), 1)  # appending one for the last element in the list
-        lst = []  # creating a list to store the zipped sumVal and diff
-        zipped_c = zip(sumVal, diff)  # zipping the lists sumVal and diff
+
+        # creating a list from the dictionary and storing the second value in the list
+        rv_list = list(sum_dict.items())
+        m_list = [z[1] for z in rv_list]
+
+        # finding the sum for each consecutive value
+        sumVal = [sum(m_list[:i + 1]) for i in range(len(m_list))]
+        if 0 not in rows:
+            sumVal.insert(0, 0)
+        rows.sort()
+        rows.insert(0, 0)
+
+        # finding the difference of each value in list
+        diff = [rows[i + 1] - rows[i] for i in range(len(rows) - 1)]
+        diff.insert(len(diff), 1)
+        # creating a list to store the zipped sumVal and diff
+        lst = []
+        zipped_c = zip(sumVal, diff)
         for num in zipped_c:
-            lst.append(num)  # appending the tuples to lst
-        sumA = []  # list to find sumA
+            lst.append(num)
+
+            # duplicated sumVal by the number of empty rows to find sumA
+        sumA = []
         for element in lst:
-            if element[1] > 1:  # if difference between rows > 1 duplicate elements by the difference
+            if element[1] > 1:
                 sumA.extend([element[0]] * element[1])
             else:
-                sumA.append(element[0])  # else just append value
-        sumA.insert(0,0)  # cumulative sum up to row 0
+                sumA.append(element[0])
+        sumA.insert(0, 0)
+
+        # modifying the empty lists
         self.colA = colA
         self.valA = valA
         self.sumA = sumA
         self.cols = columns
-        # self.cols = cols
-        self.num = int(columns_rows)
-        self.rows = rows
-        # print(self.valA)
-
 
     def appendRow(self):
         """
@@ -113,14 +96,15 @@ class CSRSpreadsheet(BaseSpreadsheet):
 
         @return True if operation was successful, or False if not.
         """
+
+        # appending row
         try:
-            lastElement = self.sumA[-1]  # finding the last element in sumA list
-            self.sumA.append(lastElement)  # duplicating the last element in the sumA list
-            # self.row += 1
+            # finding the last element in sumA list and duplicates it, else returns false
+            lastElement = self.sumA[-1]
+            self.sumA.append(lastElement)
             return True
         except NameError:
             return False
-
 
     def appendCol(self):
         """
@@ -128,18 +112,14 @@ class CSRSpreadsheet(BaseSpreadsheet):
 
         @return True if operation was successful, or False if not.
         """
-
-        # TO BE IMPLEMENTED
         try:
-            self.cols += 1 # adds one to track column numbers
-            # n = max(self.cols)
-            # self.cols.append(n)
+            # tracks the column numbers and adds two, one for 0, and one for extra column
+            self.cols = self.cols + 2
             return True
         except NameError:
             return False
 
-
-    def insertRow(self, rowIndex: int)->bool:
+    def insertRow(self, rowIndex: int) -> bool:
         """
         Inserts an empty row into the spreadsheet.
 
@@ -147,23 +127,24 @@ class CSRSpreadsheet(BaseSpreadsheet):
 
         @return True if operation was successful, or False if not, e.g., rowIndex is invalid.
         """
-        value = self.sumA[rowIndex]  # finding the value of row according to rowIndex
-        if rowIndex > 0:  # if rowIndex greater than zero, insert value using the rowIndex
-            self.sumA.insert(rowIndex, value)  # inserting value at rowIndex
-            # self.row += 1
+        # if rowIndex greater than zero, insert value using the rowIndex
+        if rowIndex > 0:
+            value = self.sumA[rowIndex]
+            self.sumA.insert(rowIndex, value)
             return True
-        elif rowIndex == 0:  # if rowIndex equals zero, insert value at the start of SumA list
-            self.sumA.insert(0, 0)
-            # self.row += 1
+        # if rowIndex equals zero, insert value at the start of SumA list
+        elif rowIndex == 0:
+            self.sumA.insert(rowIndex, 0)
             return True
+        # if rowIndex equals zero, insert value at the start of SumA list
         elif rowIndex == -1:
-            self.sumA.append(value)  # appending value at end of sumA list
+            last_element = self.sumA[-1]
+            self.sumA.append(last_element)
             return True
         else:
             return False
 
-
-    def insertCol(self, colIndex: int)->bool:
+    def insertCol(self, colIndex: int) -> bool:
         """
         Inserts an empty column into the spreadsheet.
 
@@ -171,24 +152,18 @@ class CSRSpreadsheet(BaseSpreadsheet):
 
         return True if operation was successful, or False if not, e.g., colIndex is invalid.
         """
-
-        if 0 < colIndex < self.cols:  # making sure colIndex is a positive integer and in column list
+        for i in range(self.cols):  # making sure that the colIndex is in the spreadsheet
+            if i == colIndex:
+                continue
+        # adds one to the column numbers if column numbers after inserted column
+        if colIndex >= 0:
             for i in range(len(self.colA)):
-                if self.colA[i] >= colIndex:   # finds if column number is larger than colIndex
-                    self.colA[i] = self.colA[i] + 1  # if larger, adds one to the column number
-            self.cols += 1
-            # for i in range(len(self.cols)):
-            #     if self.cols[i] >= colIndex:
-            #         self.cols[i] = self.col[i] + 1
-            # n = self.colA[colIndex]
-            # n = max(self.cols)
-            # self.cols.append(n)
-            return True
-        elif colIndex == 0:
-            self.cols += 1  # add another column to self.cols
+                if self.colA[i] >= colIndex:
+                    self.colA[i] = self.colA[i] + 1
+            self.cols = self.cols + 1
             return True
         elif colIndex == -1:
-            self.cols += 1  # add another column to self.cols
+            self.cols = self.cols + 1  # tracking col numbers
             return True
         else:
             return False
@@ -203,169 +178,173 @@ class CSRSpreadsheet(BaseSpreadsheet):
 
         @return True if cell can be updated.  False if cannot, e.g., row or column indices do not exist.
         """
-        if colIndex >= self.cols or rowIndex > len(self.sumA) - 1:  # check if column and row index exist
+        column_length = self.cols - 1  # minus one for zero
+
+        row_length = len(self.sumA)
+
+        if colIndex > column_length or rowIndex > row_length - 1:
             return False
         else:
             myList = []
             indices = []
-            # print("indices before", self.sumA)
-            # print("before", self.colA)
+            result = []
 
-            for r_inx, row in enumerate(self.sumA):  # finding the row indexes and values for each row
-                # print(r_inx, row)
+            # finds and appends row indexes which are have values
+            for r_inx, row in enumerate(self.sumA):
                 if row not in myList and row != 0:
-                    # print("row", row)
                     myList.append(row)
                     if row in myList:
                         indices.append(r_inx - 1)
 
-            # n = self.row
-            # print(n)
-            # new = [item -1 for item in indices for i in range(n)]
+            # if indexes are not equal the index must be duplicated by row
+            if len(indices) < len(self.valA):
+                result = []
+                start = 0
+                for i in indices:
+                    target = myList[i]  # find the target value
+                    count = 0  # initializing a counter for num of elements
 
-            # print(new)
-            # zipped_pairs = zip(self.colA, new)
-            zipped_pairs = zip(self.colA, indices)
+                    # # check if current element in valA is <= to target value and if so, subtracts element from target
+                    for j in range(start, len(self.valA)):
+                        if self.valA[j] <= target:
+                            target -= self.valA[j]
+                            count += 1
+                            if target == 0:
+                                start = j + 1
+                                break
+                    if target == 0 and count > 0:  # final check to ensure target has been met by elements
+                        result.extend([i] * count)
+                    else:  # append current index to the result list
+                        for k in range(count):  # appending index
+                            result.append(i)
 
-            # print(len(new))
+                zipped_pairs = zip(indices, self.colA, self.valA)
+                for elements in zipped_pairs:
+                    # if element equals value append indices to list
+                    if elements[2] == value:
+                        result.append(elements[:2])
 
-            # print("indices", indices)
+                # changing the indice values to the result values
+                indices = result
+
+                zipped_pairs = zip(self.colA, indices)
+            else:
+                zipped_pairs = zip(self.colA, indices)
+
             lst = []
-            for element in zipped_pairs:
+            for element in zipped_pairs:  # appending the column and row values to lst
                 lst.append(element)
-            # print("lst", lst)
-            # print(self.valA)
-
-            # if updating existing cell update column
 
             new_tuple = (colIndex, rowIndex)
 
+            # if column and row index not in lst append it
             if new_tuple not in lst:
                 lst.append(new_tuple)
-                # print("lst", lst)
+            lst.sort(key=lambda x: x[1], reverse=False)  # sort list according to row index
 
-            lst.sort(key=lambda x: x[1], reverse=False)
-            # print("sorted", lst)
-
+            # taking just the first value (column index) to create colA, then replaces self.colA
             new_colA = [z[0] for z in lst]
-
             self.colA = new_colA
 
-            # print("after", self.colA)
-
-            # finding valA indcies
+            # finding valA indices
             valA_indices = []
-            # print("valA before", self.valA)
-
-            for r_inx, row in enumerate(self.valA):  # finding the row indexes and values for each row
+            for r_inx, row in enumerate(self.valA):
                 valA_indices.append(r_inx)
-
             zipped_valA_indices = zip(valA_indices, indices)
-            # zipped_valA_indices = zip(valA_indices, new)
 
-
+            # appending row and value indexes together
             vala = []
-
             for element in zipped_valA_indices:
                 vala.append(element)
-            # print("indices", vala)
-
-            # update value or inserting value in volA:
-
             zipped_rv = zip(self.valA, self.colA, indices)
-            # zipped_rv = zip(self.valA, self.colA, new)
 
-
+            # appending values columns and rows to values list
             values = []
             for element in zipped_rv:
                 values.append(element)
-            # print(values, "values")
-            # print(len(values))
-
-            # updates a cells value if the row and column index are found
-
+            # modifying existing value to new value
             for index, elements in enumerate(values):
-                #         print("elements", values[index][1])
                 if values[index][1] == colIndex and values[index][2] == rowIndex:
-
                     for element in vala:
-                        if element[1] == rowIndex:
-                            self.valA[element[0]] = value
-
+                        if element[1] == rowIndex and element[0] == colIndex:
+                            self.valA[element[0]] = value  # replacing existing value with new value
                 else:
                     pass
 
+            # checking if length of colA and valA are the same
             if len(self.colA) > len(self.valA):
                 vala_tuple = (value, colIndex, rowIndex)
 
+                # if new tuple is not in values, append it
                 if vala_tuple not in values:
                     values.append(vala_tuple)
-                    #                 print("values", values)
-
                     values.sort(key=lambda x: x[2], reverse=False)
-                    #                 print("sorted", values)
-                    # print("values", values)
+
+                    # creating the new_valA list with first element in values
                     new_valA = [z[0] for z in values]
                     self.valA = new_valA
             else:
                 pass
 
-            #     new = zip(indices, csr[1])
+            # finding if there are duplicate rows
+            if len(indices) != len(set(indices)):
+                num_rows = len(set(result))
 
-            # print(indices)
+                # Initialize a list to store the sums for each row
+                sumVal = [0] * num_rows
 
-            # #     for index, row in enumerate(csr[2]):
-            # #         print(row)
-            # print("valA after", self.valA)
-            sumVal = [sum(self.valA[:i + 1]) for i in range(len(self.valA))]  # finding the sum for each value
-            # print("sumA before", self.sumA)
+                # Loop over the result list and add up the values in valA
+                cumulative_sum = 0
+                for i, r in enumerate(result):
+                    sumVal[r] += self.valA[i] + cumulative_sum
+                    if i < len(result) - 1 and result[i] != result[i + 1]:
+                        cumulative_sum = sumVal[r]
+                    else:
+                        cumulative_sum = 0
+            else:
+                sumVal = [sum(self.valA[:i + 1]) for i in range(len(self.valA))]  # finding the sum for each value
+                sumVal.insert(0, 0)
 
-            sumVal.insert(0, 0)
-            # print("sumVal", sumVal)
-            #     sumVal.insert(0, 0)
+            # creating index list
             inx = [x[2] for x in values]
-            inx.insert(0, 0)  # appending 0 to the start of the list
-            # print("indices", indices)
-            diff = [inx[i + 1] - inx[i] for i in range(len(inx) - 1)]  # finding the difference between each value in the list
-            diff.insert(len(diff), 1)  # appending one for the last element in the
-            # print("diff", diff)
-            lst = []  # creating a list to store the zipped sumVal and diff
+            inx.insert(0, 0)
+
+            # finding the difference between each value in the list
+            diff = [inx[i + 1] - inx[i] for i in range(len(inx) - 1)]
+            diff.insert(len(diff), 1)
+
+            # creating a list to store the zipped sumVal and diff
+            lst = []
             if len(sumVal) > len(diff):
-                # print(True)
                 difference = len(inx) - len(diff)
-                # print(difference)
                 diff.append(difference + 1)
-            zipped_c = zip(sumVal, diff)  # zipping the lists sumVal and diff
+            zipped_c = zip(sumVal, diff)
             for num in zipped_c:
-                lst.append(num)  # appending the tupes to lst
-            # print("lst", lst)
-            # print("diff", diff)
-            sumA = []  # list to find sumA
+                lst.append(num)
+
+            # list to find sumA
+            sumA = []
             for element in lst:
                 if element[1] > 1:  # if difference between rows > 1 duplicate elements by the difference
                     sumA.extend([element[0]] * element[1])
                 else:
-                    sumA.append(element[0])  # else just append value
-            #     sumA.insert(0,0)  # cumulative sum up to row 0
-            self.sumA = sumA
-            # self.sumA.insert(0,0)
+                    sumA.append(element[0])
+            self.sumA = sumA  # changing the elements in sumA to the new values
             self.sumA.insert(0, 0)
-            # print("sumA after", self.sumA)
             return True
 
-    def rowNum(self)->int:
+    def rowNum(self) -> int:
         """
         @return Number of rows the spreadsheet has.
         """
         length = len(self.sumA)  # finding the length of sumA
         return length - 1  # minus one for the zero
-        # return self.row
 
-    def colNum(self)->int:
+    def colNum(self) -> int:
         """
         @return Number of column the spreadsheet has.
         """
-        return self.cols
+        return self.cols  # returning number of columns
 
     def find(self, value: float) -> [(int, int)]:
         """
@@ -375,57 +354,94 @@ class CSRSpreadsheet(BaseSpreadsheet):
 
         @return List of cells (row, col) that contains the input value.
 	    """
-
+        # empty lists to store row indexes, row values, and final index list
         indices = []
-        row_value = []
+        myList = []
         index_list = []
-        # print("value", row_value)
-        for r_inx, row in enumerate(self.sumA):  # finding the row indexes and values for each row
-            if row not in row_value and row != 0:
-                # print(True)
-                row_value.append(row)
-                if row in row_value:
-                    # print(r_inx)
-                    indices.append(r_inx -1)  # minus one for 0
-        # for r_inx, row in enumerate (self.valA):
-        # print(len(indices))
-        n = self.num
-        # print(n)
-        new = [item - 1 for item in indices for i in range(n)]
 
-        # print(len(self.colA))
-        print(len(self.colA), len(self.valA), len(new))
-        zipped_pairs = zip(self.rows, self.colA, self.valA)  # zipping rows, columns, and values together
-        for elements in zipped_pairs:
-            # print(elements)
-            if elements[2] == value:  # if row value equals value append row and column indexes to list
-                # print(elements)
-                index_list.append(elements[:2])
-        return index_list
+        # finds index for rows which have values
+        for r_inx, row in enumerate(self.sumA):
+            if row not in myList and row != 0:
+                myList.append(row)
+                if row in myList:
+                    indices.append(r_inx - 1)  # minus one for the zero
 
+        # if indexes are not equal the index must be duplicated by row
+        if len(indices) < len(self.valA):
+            result = []
+            start = 0  # starting index
+            for i in indices:
+                target = myList[i]  # find the target value
+                count = 0  # initializing a counter for num of elements
+                for j in range(start,
+                               len(self.valA)):  # iterate through element in valA starting from current start index
+                    if self.valA[j] <= target:  # check if current element in valA is <= to target value
+                        target -= self.valA[j]  # if so subtract current element from target
+                        count += 1
+                        if target == 0:  # if target is zero, update start index and exit the loop
+                            start = j + 1
+                            break
+                if target == 0 and count > 0:  # final check to ensure target has been met by elements
+                    result.extend([i] * count)
+                else:
+                    for k in range(count):
+                        result.append(i)
+            zipped_pairs = zip(indices, self.colA, self.valA)
 
+            for elements in zipped_pairs:
+                if elements[2] == value:  # if element equals value append indices to list
+                    index_list.append(elements[:2])
+            return index_list
+        else:
+            zipped_pairs = zip(indices, self.colA, self.valA)  # zipping rows, columns, and values together
+            for elements in zipped_pairs:
+                if elements[2] == value:  # if element equals value append indices to list
+                    index_list.append(elements[:2])
+            return index_list
 
     def entries(self) -> [Cell]:
         """
         return a list of cells that have values (i.e., all non None cells).
         """
         indexes = []
-        row_values = []
+        lst = []
         final_list = []
 
+        # finds index for rows which have values
         for r_inx, row in enumerate(self.sumA):
-            if row not in row_values and row != 0:
-                row_values.append(row)
-                if row in row_values:
+            if row not in lst and row != 0:
+                lst.append(row)
+                if row in lst:
                     indexes.append(r_inx - 1)
-        n = self.num
-        # print(n)
-        new = [item - 1 for item in indexes for i in range(n)]
 
-        # zipped_pairs = zip(new, self.colA, self.valA)
-        zipped_pairs = zip(self.rows, self.colA, self.valA)
+        # if indexes are not equal the index must be duplicated by row
+        if len(indexes) < len(self.valA):
+            result = []
+            start = 0
+            for i in indexes:
+                target = lst[i]  # find the target value
+                count = 0
+                for j in range(start,
+                               len(self.valA)):  # iterate through element in valA starting from current start index
+                    if self.valA[j] <= target:  # check if current element in valA is <= to target value
+                        target -= self.valA[j]  # if so subtract current element from target
+                        count += 1
+                        if target == 0:  # if target is zero, update start index and exit the loop
+                            start = j + 1
+                            break
+                if target == 0 and count > 0:  # final check to ensure target has been met by elements
+                    result.extend([i] * count)
+                else:  # append current index to the result list
+                    for k in range(count):
+                        result.append(i)
 
-        for elements in zipped_pairs:
-            final_list.append(elements)
-        # print(self.valA)
+            # zipping row index, column index, and value together and appending it to final list
+            zipped_pairs = zip(result, self.colA, self.valA)
+            for elements in zipped_pairs:
+                final_list.append(elements)
+        else:
+            # zipping row index, column index, and value together and appending it to final list
+            zipped_pairs = zip(indexes, self.colA, self.valA)
+            for elements in zipped_pairs:
+                final_list.append(elements)
         return final_list
